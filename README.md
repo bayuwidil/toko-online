@@ -1,59 +1,132 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <h1 align="center">🚀 Modern E-Commerce Platform</h1>
 </p>
 
-## About Laravel
+<p align="center">
+  Aplikasi e-commerce modern berfitur lengkap yang dibangun dengan ekosistem Laravel terkini, dirancang untuk performa tinggi, tampilan elegan, serta sistem pembayaran dan pengiriman otomatis.
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-v12.x-red?style=for-the-badge&logo=laravel" alt="Laravel">
+  <img src="https://img.shields.io/badge/Livewire-v3.x-purple?style=for-the-badge&logo=livewire" alt="Livewire">
+  <img src="https://img.shields.io/badge/Filament-v3.x-orange?style=for-the-badge&logo=filament" alt="Filament">
+  <img src="https://img.shields.io/badge/TailwindCSS-v3.x-blue?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Midtrans-Payment-green?style=for-the-badge" alt="Midtrans">
+  <img src="https://img.shields.io/badge/RajaOngkir-Shipping-yellow?style=for-the-badge" alt="RajaOngkir">
+</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📋 Fitur Utama
 
-## Learning Laravel
+- **🛒 Interactive Shopping Cart:** Panel keranjang belanja mengambang (*slide-over*) interaktif menggunakan Livewire dan *Alpine.js*.
+- **📦 Cek Ongkir Real-time:** Integrasi dengan API **RajaOngkir** untuk pemilihan provinsi, kota, dan kalkulasi ongkos kirim berbagai ekspedisi secara akurat.
+- **💳 Payment Gateway Otomatis:** Integrasi **Midtrans Snap** (mendukung QRIS, Virtual Account, E-Wallet) lengkap dengan sistem *Webhook* otomatis untuk verifikasi status lunas (*Paid*) dan pemotongan stok secara *real-time*.
+- **⚡ Single-Page Feel:** Navigasi cepat dan dinamis berkat kekuatan reaktifitas Livewire v3.
+- **🎨 Modern UI/UX:** Antarmuka bersih dan elegan yang dibangun menggunakan **Tailwind CSS**.
+- **👑 Advanced Admin Dashboard:** Manajemen produk, kategori, dan pesanan berbasis **Filament v3** yang powerful.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tech Stack
 
-## Laravel Sponsors
+- **Framework:** Laravel 12
+- **Frontend & Reaktifitas:** Livewire v3 & Alpine.js
+- **Styling:** Tailwind CSS
+- **Admin Panel:** Filament v3
+- **Payment Gateway:** Midtrans PHP Library
+- **Shipping API:** RajaOngkir API
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## ⚙️ Panduan Instalasi (Installation Guide)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Ikuti langkah-langkah di bawah ini untuk menjalankan proyek ini di komputer lokal Anda:
 
-## Contributing
+### 1. Clone Repositori & Masuk Direktori
+Pastikan Anda sudah mengklon atau menempatkan file proyek di direktori kerja lokal, lalu buka terminal pada folder tersebut:
+```Bash
+cd nama-folder-proyek
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Install Dependensi PHP (Composer)
+Jalankan perintah berikut untuk mengunduh pustaka PHP yang dibutuhkan:
+```Bash
+composer install
+```
 
-## Code of Conduct
+### 3. Install Dependensi JavaScript (NPM)
+```
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Konfigurasi Environment (.env)
+Salin file contoh konfigurasi environment:
+```bash
+cp .env.example .env
+```
+Generate kunci enkripsi aplikasi:
+```bash
+php artisan key:generate
+```
+### 5. Konfigurasi Database & API Keys
+Buka file .env menggunakan teks editor pilihan Anda, kemudian sesuaikan konfigurasi database serta kunci API pihak ketiga:
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database_anda
+DB_USERNAME=root
+DB_PASSWORD=
 
-## Security Vulnerabilities
+# Konfigurasi RajaOngkir
+RAJAONGKIR_API_KEY=masukkan_api_key_rajaongkir_anda_disini
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Konfigurasi Midtrans (Sandbox / Production)
+MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxx
+MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxxx
+MIDTRANS_IS_PRODUCTION=false
+```
+### 6. Migrasi & Seed Database
+Jalankan migrasi database beserta data awal:
+```bash
+php artisan migrate --seed
+```
+### 7. Buat User Admin Filament
+Untuk mengakses panel admin, buat akun administrator baru melalui terminal:
+```bash
+php artisan make:filament-user
+```
+### 8. Jalankan Server Lokal
+Buka dua tab terminal terpisah untuk menjalankan server backend dan asset compiler secara bersamaan:
 
-## License
+Tab 1 (Laravel Server):
+```bash
+Bash
+php artisan serve
+Tab 2 (Vite Asset Bundler):
+```
+```bash
+Bash
+npm run dev
+```
+Aplikasi kini sudah bisa diakses melalui browser pada alamat:
+```bash
+Frontend Toko: http://127.0.0.1:8000
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Panel Admin: http://127.0.0.1:8000/admin
+```
+
+## 🔒 Konfigurasi Webhook Midtrans (Opsional untuk Localhost)
+Jika Anda ingin menguji notifikasi pembayaran otomatis di komputer lokal, gunakan Ngrok untuk membuka jalur publik:
+
+Jalankan Ngrok: ngrok http 8000
+
+Salin URL HTTPS yang dihasilkan Ngrok (contoh: https://xxxx.ngrok-free.app).
+
+Masuk ke Dashboard Midtrans Sandbox > Settings > Configuration.
+
+Masukkan URL Webhook: https://xxxx.ngrok-free.app/api/midtrans/webhook
+
+## 📄 License
+Proyek ini bersifat open-source di bawah lisensi MIT license.
