@@ -50,22 +50,113 @@
 
         {{-- No HP --}}
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Nomor HP / WhatsApp
-            </label>
+
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        Nomor HP / WhatsApp
+    </label>
+
+    <div class="flex gap-2">
+
+        <input
+            type="text"
+            wire:model.live="phone"
+            placeholder="08xxxxxxxxxx"
+            class="flex-1 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+            @if($phoneVerified) readonly @endif
+        >
+
+        @if(!$phoneVerified)
+
+            <button
+                type="button"
+                wire:click="sendVerificationCode"
+                wire:loading.attr="disabled"
+                wire:target="sendVerificationCode"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+                <span wire:loading.remove wire:target="sendVerificationCode">
+                    Kirim Kode
+                </span>
+
+                <span wire:loading wire:target="sendVerificationCode">
+                    Mengirim...
+                </span>
+            </button>
+
+        @else
+
+            <span class="flex items-center px-3 text-green-600 font-semibold">
+                ✓ Terverifikasi
+            </span>
+
+        @endif
+
+    </div>
+
+    @error('phone')
+        <span class="text-red-500 text-xs">
+            {{ $message }}
+        </span>
+    @enderror
+
+</div>
+
+@if($verificationNotice)
+    <div class="mt-4 bg-green-50 border border-green-200 rounded-xl p-4">
+        <p class="text-sm font-medium text-green-700">{{ $verificationNotice }}</p>
+    </div>
+@endif
+
+@if($otpSent && !$phoneVerified)
+
+    <div class="mt-4 bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+
+        <label class="block text-sm font-semibold text-gray-800 mb-2">
+            Kode Verifikasi WhatsApp
+        </label>
+
+        <p class="text-xs text-gray-600 mb-3">
+            Masukkan kode 6 digit yang dikirim ke WhatsApp Anda.
+        </p>
+
+        <div class="flex gap-2">
 
             <input
                 type="text"
-                wire:model.live="phone"
-                class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                wire:model.live="otp"
+                maxlength="6"
+                inputmode="numeric"
+                placeholder="000000"
+                class="flex-1 border-gray-300 rounded-lg text-center tracking-widest font-bold"
             >
 
-            @error('phone')
-                <span class="text-red-500 text-xs">
-                    {{ $message }}
+            <button
+                type="button"
+                wire:click="verifyPhone"
+                wire:loading.attr="disabled"
+                wire:target="verifyPhone"
+                class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+                <span wire:loading.remove wire:target="verifyPhone">
+                    Verifikasi
                 </span>
-            @enderror
+
+                <span wire:loading wire:target="verifyPhone">
+                    Memeriksa...
+                </span>
+            </button>
+
         </div>
+
+        @error('otp')
+            <span class="text-red-500 text-xs mt-2 block">
+                {{ $message }}
+            </span>
+        @enderror
+
+    </div>
+
+@endif
 
 
         {{-- Alamat Manual --}}
@@ -330,7 +421,7 @@
                 </div>
             @endif
 
-            <button wire:click="processCheckout" wire:loading.attr="disabled" 
+            <button wire:click="processCheckout" wire:loading.attr="disabled" @disabled(!$phoneVerified)
                     class="w-full bg-gray-900 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-200 shadow-lg flex justify-center items-center gap-2 disabled:bg-gray-400">
                 <span wire:loading.remove wire:target="processCheckout">Bayar Sekarang &rarr;</span>
                 <span wire:loading wire:target="processCheckout">Memproses...</span>
@@ -350,6 +441,80 @@
 <script>
 
 document.addEventListener('livewire:init', () => {
+
+    const CHECKOUT_FORM_KEY = 'checkout_form_state';
+
+    function saveCheckoutState() {
+        const root = document.querySelector('[wire\\:id]');
+        if (!root) return;
+
+        const componentId = root.getAttribute('wire:id');
+        if (!componentId) return;
+
+        const component = Livewire.find(componentId);
+        if (!component) return;
+
+        const state = {
+            name: component.get('name'),
+            email: component.get('email'),
+            phone: component.get('phone'),
+            full_address: component.get('full_address'),
+            postal_code: component.get('postal_code'),
+            citySearch: component.get('citySearch'),
+            selectedCity: component.get('selectedCity'),
+            selectedCityName: component.get('selectedCityName'),
+            selectedProvince: component.get('selectedProvince'),
+            selectedProvinceName: component.get('selectedProvinceName'),
+            selectedDistrict: component.get('selectedDistrict'),
+            selectedDistrictName: component.get('selectedDistrictName'),
+            selectedSubdistrict: component.get('selectedSubdistrict'),
+            selectedSubdistrictName: component.get('selectedSubdistrictName'),
+            courier: component.get('courier'),
+            selectedService: component.get('selectedService'),
+        };
+
+        localStorage.setItem(CHECKOUT_FORM_KEY, JSON.stringify(state));
+    }
+
+    function restoreCheckoutState() {
+        const root = document.querySelector('[wire\\:id]');
+        if (!root) return;
+
+        const componentId = root.getAttribute('wire:id');
+        if (!componentId) return;
+
+        const component = Livewire.find(componentId);
+        if (!component) return;
+
+        const saved = localStorage.getItem(CHECKOUT_FORM_KEY);
+        if (!saved) return;
+
+        try {
+            const state = JSON.parse(saved);
+            Object.entries(state).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    component.set(key, value);
+                }
+            });
+        } catch (error) {
+            console.warn('Checkout form restore failed:', error);
+        }
+    }
+
+    document.addEventListener('input', (event) => {
+        const target = event.target;
+        if (!target || !target.closest('[wire\\:model]')) return;
+        saveCheckoutState();
+    });
+
+    Livewire.on('verification-success', () => {
+        saveCheckoutState();
+        setTimeout(() => {
+            window.location.reload();
+        }, 400);
+    });
+
+    restoreCheckoutState();
 
     Livewire.on('pay-with-midtrans', (event) => {
 
