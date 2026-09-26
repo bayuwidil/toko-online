@@ -5,6 +5,7 @@ use App\Livewire\Storefront;
 use App\Livewire\ProductDetail;
 use App\Livewire\Checkout;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SalesReportController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -42,3 +43,10 @@ Route::get(
     '/payment/invoice',
     [PaymentController::class, 'invoice']
 )->name('payment.invoice');
+
+
+
+Route::get(
+    '/admin/sales-report/pdf',
+    [SalesReportController::class, 'pdf']
+)->name('filament.admin.sales-report.pdf');
