@@ -95,10 +95,21 @@ class ProductResource extends Resource
                 Forms\Components\Group::make()->schema([
                     Forms\Components\Section::make('Gambar & Status')->schema([
                         Forms\Components\FileUpload::make('image')
-                            ->label('Gambar Produk')
-                            ->image()
-                            ->directory('products')
-                            ->required(),
+                        ->label('Gambar Produk')
+                        ->image()
+                        ->disk('public')
+                        ->directory('products')
+                        ->visibility('public')
+                        ->imagePreviewHeight('200')
+                        ->downloadable()
+                        ->openable()
+                        ->maxSize(5120)
+                        ->acceptedFileTypes([
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ])
+                        ->required(),
                             
                         Forms\Components\Toggle::make('is_active')
                             ->label('Status Aktif')
@@ -115,8 +126,10 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Gambar')
-                    ->square(),
+                ->label('Gambar')
+                ->disk('public')
+                ->square()
+                ->size(60),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Produk')
                     ->searchable(),
@@ -149,4 +162,6 @@ class ProductResource extends Resource
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
     }
+
+    
 }

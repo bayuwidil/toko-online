@@ -14,6 +14,11 @@ class OrderItem extends Model
         'price',
         'weight',
     ];
+    protected $casts = [
+        'quantity' => 'integer',
+        'price' => 'integer',
+        'weight' => 'integer',
+    ];
 
     public function order()
     {
@@ -24,5 +29,9 @@ class OrderItem extends Model
     {
         // Mengambil data spesifik produk untuk item ini
         return $this->belongsTo(Product::class); 
+    }
+    public function getSubtotalAttribute()
+    {
+        return $this->quantity * $this->price;
     }
 }

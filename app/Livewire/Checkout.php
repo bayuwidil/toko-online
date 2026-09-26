@@ -90,15 +90,42 @@ class Checkout extends Component
     public $originCityId = 39;
 
     public function mount()
-    {
-        $this->cart = session()->get('cart', []);
+{
+    $this->cart = session()->get('cart', []);
 
-        if (empty($this->cart)) {
-            return redirect('/');
-        }
-
-        $this->calculateCart();
+    if (empty($this->cart)) {
+        return redirect('/');
     }
+
+    $this->calculateCart();
+
+    $checkoutState = session()->pull('checkout_form_state');
+
+    if ($checkoutState) {
+        $this->name = $checkoutState['name'] ?? '';
+        $this->email = $checkoutState['email'] ?? '';
+        $this->phone = $checkoutState['phone'] ?? '';
+        $this->full_address = $checkoutState['full_address'] ?? '';
+        $this->postal_code = $checkoutState['postal_code'] ?? '';
+
+        $this->citySearch = $checkoutState['citySearch'] ?? '';
+
+        $this->selectedCity = $checkoutState['selectedCity'] ?? null;
+        $this->selectedCityName = $checkoutState['selectedCityName'] ?? '';
+
+        $this->selectedProvince = $checkoutState['selectedProvince'] ?? null;
+        $this->selectedProvinceName = $checkoutState['selectedProvinceName'] ?? '';
+
+        $this->selectedDistrict = $checkoutState['selectedDistrict'] ?? null;
+        $this->selectedDistrictName = $checkoutState['selectedDistrictName'] ?? '';
+
+        $this->selectedSubdistrict = $checkoutState['selectedSubdistrict'] ?? null;
+        $this->selectedSubdistrictName = $checkoutState['selectedSubdistrictName'] ?? '';
+
+        $this->courier = $checkoutState['courier'] ?? '';
+        $this->selectedService = $checkoutState['selectedService'] ?? '';
+    }
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -339,25 +366,17 @@ public function sendVerificationCode()
 public function verifyPhone()
 {
     $this->validate([
-        'otp' =>
-            'required|digits:6',
+        'otp' => 'required|digits:6',
     ]);
 
-    $phone = $this->normalizePhone(
-        $this->phone
-    );
+    $phone = $this->normalizePhone($this->phone);
 
-    $otpRecord =
-        \App\Models\PhoneOtp::where(
-            'phone',
-            $phone
-        )
+    $otpRecord = \App\Models\PhoneOtp::where('phone', $phone)
         ->whereNull('verified_at')
         ->latest()
         ->first();
 
     if (!$otpRecord) {
-
         $this->addError(
             'otp',
             'Kode OTP tidak ditemukan.'
@@ -366,15 +385,7 @@ public function verifyPhone()
         return;
     }
 
-    /*
-     * Cek expired
-     */
-    if (
-        now()->greaterThan(
-            $otpRecord->expires_at
-        )
-    ) {
-
+    if (now()->greaterThan($otpRecord->expires_at)) {
         $this->addError(
             'otp',
             'Kode OTP sudah kedaluwarsa.'
@@ -383,11 +394,7 @@ public function verifyPhone()
         return;
     }
 
-    /*
-     * Maksimal 5 kali percobaan
-     */
     if ($otpRecord->attempts >= 5) {
-
         $this->addError(
             'otp',
             'Terlalu banyak percobaan.'
@@ -396,15 +403,10 @@ public function verifyPhone()
         return;
     }
 
-    /*
-     * Cek OTP
-     */
-    if (
-        !\Illuminate\Support\Facades\Hash::check(
-            $this->otp,
-            $otpRecord->code_hash
-        )
-    ) {
+    if (!\Illuminate\Support\Facades\Hash::check(
+        $this->otp,
+        $otpRecord->code_hash
+    )) {
 
         $otpRecord->increment('attempts');
 
@@ -417,78 +419,60 @@ public function verifyPhone()
     }
 
     /*
-     * Tandai verified
-     */
-    $otpRecord->update([
-        'verified_at' => now(),
-    ]);
+    |--------------------------------------------------------------------------
+    | Cari user
+    |--------------------------------------------------------------------------
+    */
 
-    /*
-     * Cari user
-     */
     $user = \App\Models\User::where(
         'phone',
         $phone
     )->first();
 
     /*
-     * Kalau belum punya akun → buat akun
-     */
+    |--------------------------------------------------------------------------
+    | Buat user baru
+    |--------------------------------------------------------------------------
+    */
+
     if (!$user) {
 
         $password = '12345678';
 
         $user = \App\Models\User::create([
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $phone,
+            'password' => \Illuminate\Support\Facades\Hash::make(
+                $password
+            ),
 
-            'name' =>
-                $this->name,
+            'phone_verified_at' => now(),
 
-            'email' =>
-                $this->email,
-
-            'phone' =>
-                $phone,
-
-            'password' =>
-                \Illuminate\Support\Facades\Hash::make(
-                    $password
-                ),
-
-            'phone_verified_at' =>
-                now(),
-
-            'address' =>
-                $this->full_address,
-
-            'province' =>
-                $this->selectedProvinceName,
-
-            'city' =>
-                $this->selectedCityName,
-
-            'district' =>
-                $this->selectedDistrictName,
-
-            'subdistrict' =>
-                $this->selectedSubdistrictName,
-
-            'postal_code' =>
-                $this->postal_code,
+            'address' => $this->full_address,
+            'province' => $this->selectedProvinceName,
+            'city' => $this->selectedCityName,
+            'district' => $this->selectedDistrictName,
+            'subdistrict' => $this->selectedSubdistrictName,
+            'postal_code' => $this->postal_code,
         ]);
 
         /*
-         * Kalau menggunakan Spatie Role
-         */
-        $user->assignRole('customer');
+        |--------------------------------------------------------------------------
+        | Role customer
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$user->hasRole('customer')) {
+            $user->assignRole('customer');
+        }
 
         /*
-         * Login otomatis
-         */
-        auth()->login($user);
+        |--------------------------------------------------------------------------
+        | Kirim informasi akun
+        |--------------------------------------------------------------------------
+        */
 
-        /*
-         * Kirim informasi akun
-         */
         $message =
             "Akun Anda berhasil dibuat."
             . "\n\n"
@@ -500,9 +484,7 @@ public function verifyPhone()
             . "\n"
             . "Anda dapat mengganti password setelah login.";
 
-        app(
-            \App\Services\WhatsAppService::class
-        )->send(
+        app(\App\Services\WhatsAppService::class)->send(
             $phone,
             $message
         );
@@ -512,40 +494,97 @@ public function verifyPhone()
     } else {
 
         /*
-         * Akun sudah ada
-         */
+        |--------------------------------------------------------------------------
+        | User lama
+        |--------------------------------------------------------------------------
+        */
+
         $user->update([
-            'phone_verified_at' =>
-                now(),
+            'phone_verified_at' => now(),
         ]);
 
-        auth()->login($user);
+        /*
+        |--------------------------------------------------------------------------
+        | Pastikan role customer
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$user->hasRole('customer')) {
+            $user->assignRole('customer');
+        }
 
         $this->accountCreated = false;
     }
 
     /*
-     * Tandai nomor verified
-     */
-    $this->phoneVerified = true;
+    |--------------------------------------------------------------------------
+    | Tandai OTP sebagai verified
+    |--------------------------------------------------------------------------
+    */
+
+    $otpRecord->update([
+        'verified_at' => now(),
+    ]);
 
     /*
-     * Simpan data terbaru ke akun
-     */
-    $this->saveCustomerData(
-        $user
-    );
+    |--------------------------------------------------------------------------
+    | Simpan data customer
+    |--------------------------------------------------------------------------
+    */
 
-    /*
-     * Hapus OTP
-     */
-    $otpRecord->delete();
+    $this->saveCustomerData($user);
 
-    $this->verificationNotice = 'Nomor WhatsApp berhasil diverifikasi.';
-    $this->otp = '';
-    $this->dispatch('verification-success');
+
+    session()->put('verified_checkout_user_id', $user->id);
+
+// Tandai OTP berhasil
+$otpRecord->update([
+    'verified_at' => now(),
+]);
+
+// Hapus OTP
+$otpRecord->delete();
+
+// Update state Livewire
+$this->phoneVerified = true;
+
+$this->verificationNotice =
+    'Nomor WhatsApp berhasil diverifikasi.';
+
+$this->otp = '';
+
+$this->otpSent = false;
+
+// Backup data checkout
+$this->saveCheckoutFormState();
 }
 
+protected function saveCheckoutFormState(): void
+{
+    session()->put('checkout_form_state', [
+        'name' => $this->name,
+        'email' => $this->email,
+        'phone' => $this->phone,
+        'full_address' => $this->full_address,
+        'postal_code' => $this->postal_code,
+
+        'citySearch' => $this->citySearch,
+        'selectedCity' => $this->selectedCity,
+        'selectedCityName' => $this->selectedCityName,
+
+        'selectedProvince' => $this->selectedProvince,
+        'selectedProvinceName' => $this->selectedProvinceName,
+
+        'selectedDistrict' => $this->selectedDistrict,
+        'selectedDistrictName' => $this->selectedDistrictName,
+
+        'selectedSubdistrict' => $this->selectedSubdistrict,
+        'selectedSubdistrictName' => $this->selectedSubdistrictName,
+
+        'courier' => $this->courier,
+        'selectedService' => $this->selectedService,
+    ]);
+}
 
 private function saveCustomerData($user)
 {
@@ -958,13 +997,75 @@ private function saveCustomerData($user)
 
     public function processCheckout()
     {
-        if (!$this->phoneVerified || !auth()->check()) {
+        if (!$this->phoneVerified) {
+
         session()->flash(
             'error',
             'Silakan verifikasi nomor WhatsApp terlebih dahulu.'
         );
 
         return;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ambil user hasil verifikasi OTP
+    |--------------------------------------------------------------------------
+    */
+
+    $verifiedUserId = session(
+        'verified_checkout_user_id'
+    );
+
+    if (!$verifiedUserId) {
+
+        session()->flash(
+            'error',
+            'Sesi verifikasi WhatsApp telah berakhir. Silakan verifikasi kembali.'
+        );
+
+        $this->phoneVerified = false;
+
+        return;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ambil user
+    |--------------------------------------------------------------------------
+    */
+
+    $user = \App\Models\User::find($verifiedUserId);
+
+    if (!$user) {
+
+        session()->forget(
+            'verified_checkout_user_id'
+        );
+
+        $this->phoneVerified = false;
+
+        session()->flash(
+            'error',
+            'Akun tidak ditemukan. Silakan verifikasi nomor WhatsApp kembali.'
+        );
+
+        return;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN SEKARANG
+    |--------------------------------------------------------------------------
+    |
+    | Login dilakukan pada tahap checkout.
+    | Setelah request ini selesai kita tidak membutuhkan
+    | request Livewire berikutnya untuk proses alamat.
+    |--------------------------------------------------------------------------
+    */
+
+    if (!auth()->check()) {
+        auth()->login($user);
     }
     
         $this->validate([

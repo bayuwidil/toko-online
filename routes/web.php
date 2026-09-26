@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Storefront;
 use App\Livewire\ProductDetail;
 use App\Livewire\Checkout;
-
+use App\Http\Controllers\PaymentController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -20,14 +20,25 @@ Route::get('/undefined/checkout', function () {
     return redirect()->route('checkout', ['type' => $type]);
 });
 
-Route::get('/payment/success', function () {
-    return view('payment.success');
-})->name('payment.success');
 
-Route::get('/payment/pending', function () {
-    return view('payment.pending');
-})->name('payment.pending');
 
-Route::get('/payment/failed', function () {
-    return view('payment.failed');
-})->name('payment.failed');
+
+Route::get(
+    '/payment/success',
+    [PaymentController::class, 'success']
+)->name('payment.success');
+
+Route::get(
+    '/payment/pending',
+    [PaymentController::class, 'pending']
+)->name('payment.pending');
+
+Route::get(
+    '/payment/failed',
+    [PaymentController::class, 'failed']
+)->name('payment.failed');
+
+Route::get(
+    '/payment/invoice',
+    [PaymentController::class, 'invoice']
+)->name('payment.invoice');

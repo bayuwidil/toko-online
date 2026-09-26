@@ -36,7 +36,7 @@
 
             <input
                 type="text"
-                wire:model.live="name"
+                wire:model="name"
                 class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
             >
 
@@ -59,7 +59,7 @@
 
         <input
             type="text"
-            wire:model.live="phone"
+            wire:model="phone"
             placeholder="08xxxxxxxxxx"
             class="flex-1 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
             @if($phoneVerified) readonly @endif
@@ -123,7 +123,7 @@
 
             <input
                 type="text"
-                wire:model.live="otp"
+                wire:model="otp"
                 maxlength="6"
                 inputmode="numeric"
                 placeholder="000000"
@@ -166,7 +166,7 @@
             </label>
 
             <textarea
-                wire:model.live="full_address"
+                wire:model="full_address"
                 rows="3"
                 placeholder="Nama jalan, nomor rumah, RT/RW, patokan, dll."
                 class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
@@ -189,7 +189,7 @@
 
             <input
                 type="text"
-                wire:model.live.debounce.300ms="citySearch"
+                wire:model.live.debounce.500ms="citySearch"
                 placeholder="Ketik nama desa, kecamatan, kota atau kabupaten"
                 class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                 autocomplete="off"
@@ -507,12 +507,7 @@ document.addEventListener('livewire:init', () => {
         saveCheckoutState();
     });
 
-    Livewire.on('verification-success', () => {
-        saveCheckoutState();
-        setTimeout(() => {
-            window.location.reload();
-        }, 400);
-    });
+    
 
     restoreCheckoutState();
 
@@ -531,29 +526,49 @@ document.addEventListener('livewire:init', () => {
 
             onSuccess: function(result) {
 
-                window.location.href = "{{ route('payment.success') }}";
+                console.log(
+                'Pembayaran berhasil:',
+                result
+            );
+
+            const orderId =
+                result.order_id;
+
+            window.location.href =
+                "{{ route('payment.success') }}"
+                + "?order_id="
+                + encodeURIComponent(orderId);
 
             },
 
             onPending: function(result) {
 
-                window.location.href = "{{ route('payment.pending') }}";
+            const orderId =
+                result.order_id;
 
-            },
+            window.location.href =
+                "{{ route('payment.pending') }}"
+                + "?order_id="
+                + encodeURIComponent(orderId);
+        },
 
-            onError: function(result) {
+        onError: function(result) {
 
-                window.location.href = "{{ route('payment.failed') }}";
+            const orderId =
+                result.order_id;
 
-            },
+            window.location.href =
+                "{{ route('payment.failed') }}"
+                + "?order_id="
+                + encodeURIComponent(orderId);
+        },
 
-            onClose: function() {
+        onClose: function() {
 
-                console.log(
-                    'User menutup pembayaran Midtrans.'
-                );
-
-            }
+            console.log(
+                'User menutup pembayaran Midtrans.'
+            );
+        }
 
         });
 
